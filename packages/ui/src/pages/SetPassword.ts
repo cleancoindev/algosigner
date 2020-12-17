@@ -33,6 +33,8 @@ const SetPassword: FunctionalComponent = (props) => {
     };
 
     sendMessage(JsonRpcMethod.CreateWallet, params, function(response) {
+      console.log('response: ');
+      console.log(response);
       if ('error' in response){
         setError(response.error);
       } else {

@@ -17,11 +17,15 @@ class PuppeteerEnvironment extends NodeEnvironment {
     this.global.browser = await puppeteer.launch({
       executablePath: process.env.PUPPETEER_EXEC_PATH || '',
       headless: false,
-      dumpio: true,
+      defaultViewport: {
+        width: 400,
+        height: 800,
+      },
       //slowMo: 50, // For watching tests more closely in debugging
       args: [
-        `--no-sandbox`,
-        //`--no-sandbox-and-elevated`, //For Windows
+        '--no-sandbox',
+        //'--no-sandbox-and-elevated', //For Windows
+        '--window-size=450,800',
         `--disable-extensions-except=${srcPath('dist')}`,
         `--load-extension=${srcPath('dist')}`,
       ],

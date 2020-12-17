@@ -11,14 +11,15 @@ describe('Basic Happy Path Tests', () => {
   const unsafeMenmonic =
     'grape topple reform pistol excite salute loud spike during draw drink planet naive high treat captain dutch cloth more bachelor attend attract magnet ability heavy';
   const testNetAccount = 'E2E-Tests';
-  const testAccountAddress =
-    'MTHFSNXBMBD4U46Z2HAYAOLGD2EV6GQBPXVTL727RR3G44AJ3WVFMZGSBE';
+  const testAccountAddress = 'MTHFSNXBMBD4U46Z2HAYAOLGD2EV6GQBPXVTL727RR3G44AJ3WVFMZGSBE';
   const amount = Math.ceil(Math.random() * 9); // txn size, modify multiplier for bulk
 
   let baseUrl; // set in beforeAll
   let extensionPage; // set in beforeAll
   let txId; // returned tx id from send txn
   let txTitle; // for tx verification
+
+  jest.setTimeout(15000);
 
   // TODO: switch tests to single page object
   beforeAll(async () => {
@@ -27,10 +28,7 @@ describe('Basic Happy Path Tests', () => {
     const targets = await browser.targets();
 
     const extensionTarget = targets.find(({ _targetInfo }) => {
-      return (
-        _targetInfo.title === extensionName &&
-        _targetInfo.type === 'background_page'
-      );
+      return _targetInfo.title === extensionName && _targetInfo.type === 'background_page';
     });
 
     const extensionUrl = extensionTarget._targetInfo.url || '';
@@ -44,10 +42,6 @@ describe('Basic Happy Path Tests', () => {
     await extensionPage.goto(baseUrl);
   });
 
-  beforeEach(async () => {
-    jest.setTimeout(15000);
-  });
-
   afterAll(async () => {
     extensionPage.close();
   });
@@ -58,9 +52,7 @@ describe('Basic Happy Path Tests', () => {
     const txSelector = `[data-transaction-id=${txId}]`;
     await extensionPage.waitForSelector(txSelector);
     await extensionPage.click(txSelector);
-    await expect(
-      extensionPage.$eval('#txTitle', (e) => e.innerText)
-    ).resolves.toBe(txTitle);
+    await expect(extensionPage.$eval('#txTitle', (e) => e.innerText)).resolves.toBe(txTitle);
     await expect(
       extensionPage.$eval(
         '.modal.is-active [data-transaction-id]',
@@ -87,9 +79,9 @@ describe('Basic Happy Path Tests', () => {
   });
 
   test('Set new wallet password', async () => {
-    await expect(
-      extensionPage.$eval('.mt-2', (e) => e.innerText)
-    ).resolves.toMatch('my_1st_game_was_GALAGA!');
+    await expect(extensionPage.$eval('.mt-2', (e) => e.innerText)).resolves.toMatch(
+      'my_1st_game_was_GALAGA!'
+    );
     await extensionPage.waitForSelector('#createWallet');
     await extensionPage.type('#setPassword', unsafePassword);
     await extensionPage.type('#confirmPassword', unsafePassword);
@@ -129,9 +121,9 @@ describe('Basic Happy Path Tests', () => {
 
   test('Load Account Info', async () => {
     await selectAccount();
-    await expect(
-      extensionPage.$eval('#accountName', (e) => e.innerText)
-    ).resolves.toBe(testNetAccount);
+    await expect(extensionPage.$eval('#accountName', (e) => e.innerText)).resolves.toBe(
+      testNetAccount
+    );
     await goBack();
   });
 
@@ -162,34 +154,20 @@ describe('Basic Happy Path Tests', () => {
     const assetSelector = '[data-asset-id]';
     await selectAccount();
     await extensionPage.waitForSelector(assetSelector);
-    const assetId = await extensionPage.$eval(
-      assetSelector,
-      (e) => e.dataset['assetId']
-    );
-    const assetBalance = await extensionPage.$eval(
-      assetSelector,
-      (e) => e.dataset['assetBalance']
-    );
+    const assetId = await extensionPage.$eval(assetSelector, (e) => e.dataset['assetId']);
+    const assetBalance = await extensionPage.$eval(assetSelector, (e) => e.dataset['assetBalance']);
     await extensionPage.click(assetSelector);
     await expect(
-      extensionPage.$eval(
-        `.modal ${assetSelector}`,
-        (e) => e.dataset['assetId']
-      )
+      extensionPage.$eval(`.modal ${assetSelector}`, (e) => e.dataset['assetId'])
     ).resolves.toBe(assetId);
     await expect(
-      extensionPage.$eval(
-        `.modal ${assetSelector}`,
-        (e) => e.dataset['assetBalance']
-      )
+      extensionPage.$eval(`.modal ${assetSelector}`, (e) => e.dataset['assetBalance'])
     ).resolves.toBe(assetBalance);
     await closeModal();
     const thereIsFullAssetList = await extensionPage.$('#showAssets');
     if (thereIsFullAssetList) {
       await extensionPage.click('#showAssets');
-      await extensionPage.waitForSelector(
-        `.modal [data-asset-id="${assetId}"]`
-      );
+      await extensionPage.waitForSelector(`.modal [data-asset-id="${assetId}"]`);
       await closeModal();
     }
     await goBack();
@@ -248,9 +226,7 @@ describe('Basic Happy Path Tests', () => {
     await extensionPage.waitForTimeout(2000);
 
     let pageError = await extensionPage.$eval('#tx-error', (e) => e.innerText);
-    await expect(pageError).toMatch(
-      "Overspending. Your account doesn't have sufficient funds."
-    );
+    await expect(pageError).toMatch("Overspending. Your account doesn't have sufficient funds.");
 
     await closeModal();
     await extensionPage.waitForTimeout(200);
@@ -273,9 +249,7 @@ describe('Basic Happy Path Tests', () => {
     await extensionPage.waitForTimeout(2000);
 
     let pageError = await extensionPage.$eval('#tx-error', (e) => e.innerText);
-    expect(pageError).toMatch(
-      'One or more fields are not valid. Please check and try again.'
-    );
+    expect(pageError).toMatch('One or more fields are not valid. Please check and try again.');
 
     await closeModal();
     await extensionPage.waitForTimeout(200);
@@ -285,9 +259,9 @@ describe('Basic Happy Path Tests', () => {
   test('Load Account Details', async () => {
     await extensionPage.click('#showDetails');
     await extensionPage.waitForSelector('#accountAddress');
-    await expect(
-      extensionPage.$eval('#accountAddress', (e) => e.innerText)
-    ).resolves.toBe(testAccountAddress);
+    await expect(extensionPage.$eval('#accountAddress', (e) => e.innerText)).resolves.toBe(
+      testAccountAddress
+    );
     await expect(extensionPage).toMatchElement('#accountAddress');
   });
 
@@ -349,10 +323,7 @@ describe('Create Account', () => {
     const targets = await browser.targets();
 
     const extensionTarget = targets.find(({ _targetInfo }) => {
-      return (
-        _targetInfo.title === extensionName &&
-        _targetInfo.type === 'background_page'
-      );
+      return _targetInfo.title === extensionName && _targetInfo.type === 'background_page';
     });
 
     const extensionUrl = extensionTarget._targetInfo.url || '';
@@ -383,10 +354,7 @@ describe('Create Account', () => {
 
   test('Create An Account, Step 2 - Get Mnemonic', async () => {
     await extensionPage.click('#accountAddress');
-    createdAccountAddress = await extensionPage.$eval(
-      '#accountAddress',
-      (e) => e.innerText
-    ); // setup for another test
+    createdAccountAddress = await extensionPage.$eval('#accountAddress', (e) => e.innerText); // setup for another test
 
     for (let i = 1; i <= 25; i++) {
       mnemonicArray[i] = await extensionPage.$eval(
@@ -420,17 +388,17 @@ describe('Create Account', () => {
     await extensionPage.waitForSelector('#account_' + testNetAccount);
     await extensionPage.click('#account_' + testNetAccount);
     await extensionPage.waitForTimeout(500);
-    await expect(
-      extensionPage.$eval('#accountName', (e) => e.innerText)
-    ).resolves.toBe(testNetAccount);
+    await expect(extensionPage.$eval('#accountName', (e) => e.innerText)).resolves.toBe(
+      testNetAccount
+    );
   });
 
   test('Load Account Details', async () => {
     await extensionPage.click('#showDetails');
     await extensionPage.waitForSelector('#accountAddress');
-    await expect(
-      extensionPage.$eval('#accountAddress', (e) => e.innerText)
-    ).resolves.toBe(createdAccountAddress);
+    await expect(extensionPage.$eval('#accountAddress', (e) => e.innerText)).resolves.toBe(
+      createdAccountAddress
+    );
     await expect(extensionPage).toMatchElement('#accountAddress');
   });
 
